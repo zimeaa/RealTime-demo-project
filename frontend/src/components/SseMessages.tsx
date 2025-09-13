@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useState } from "react";
+import { useSelector } from "react-redux";
 import {
   Stack,
   Typography,
@@ -9,23 +9,16 @@ import {
   Select,
   MenuItem,
   Paper,
-  Card,
-  CardContent,
-  Table,
-  TableHead,
-  TableRow,
-  TableCell,
-  TableBody,
 } from "@mui/material";
-import { clearWorkstationsHeartbeat} from "../redux/slices/heartbeatSlice";
-import { clearWorkstations } from "../redux/slices/workstationDataSlice";
+
 import { HeartbeatMessage } from "../models/HeartbeatMessage";
 import { WorkstationDataMessage } from "../models/WorkstationDataMessage";
 import { useSSE } from "../useHooks/useSSE";
+import DataMessagesSection from "./SseMessagesSection/DataMessagesSection";
+import HeartbeatCard from "./SseMessagesSection/HeartbeatSection";
 
 const RealtimeMessages = () => {
   useSSE("http://localhost:4000/sse");
-  const dispatch = useDispatch();
   const workstationsHeartbeat: HeartbeatMessage[] = useSelector(
     (state: any) => state.workstationsHeartbeat.workstationsHeartbeat
   );
@@ -84,73 +77,17 @@ const RealtimeMessages = () => {
     </Stack>
 
     {/* Heartbeat Section */}
-    <Card sx={{ marginBottom: 3, backgroundColor: "#1e1e1e", color: "#fff" }}>
-      <CardContent>
-        <Stack direction="row" justifyContent="space-between" alignItems="center">
-          <Typography variant="h6" sx={{ color: "#fff" }}>Heartbeat Messages</Typography>
-          <Button variant="contained" color="secondary" onClick={() => dispatch(clearWorkstationsHeartbeat())}>
-            Clear Heartbeat
-          </Button>
-        </Stack>
-
-        <Table size="small" sx={{ marginTop: 2, color: "#fff" }}>
-          <TableHead>
-            <TableRow>
-              <TableCell sx={{ color: "#fff" }}>Workstation</TableCell>
-              <TableCell sx={{ color: "#fff" }}>Online</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {filterByWorkstation(workstationsHeartbeat).map((msg, index) => (
-              <TableRow key={index}>
-                <TableCell sx={{ color: "#fff" }}>{msg.wsName}</TableCell>
-                <TableCell sx={{ color: "#fff" }}>{msg.isOnline ? "✅" : "❌"}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </CardContent>
-    </Card>
-
+    <HeartbeatCard 
+    workstationsHeartbeat={workstationsHeartbeat} 
+    filterByWorkstation={filterByWorkstation} 
+    />
     {/* Data Messages Section */}
-    <Card sx={{ backgroundColor: "#1e1e1e", color: "#fff" }}>
-      <CardContent>
-        <Stack direction="row" justifyContent="space-between" alignItems="center">
-          <Typography variant="h6" sx={{ color: "#fff" }}>Data Messages</Typography>
-          <Button variant="contained" color="secondary" onClick={() => dispatch(clearWorkstations())}>
-            Clear Data
-          </Button>
-        </Stack>
-
-        <Table size="small" sx={{ marginTop: 2, color: "#fff" }}>
-          <TableHead>
-            <TableRow>
-              <TableCell sx={{ color: "#fff" }}>Workstation</TableCell>
-              <TableCell sx={{ color: "#fff" }}>Timestamp</TableCell>
-              <TableCell sx={{ color: "#fff" }}>Action</TableCell>
-              <TableCell sx={{ color: "#fff" }}>Data</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {filterByWorkstation(workstationsData).map((msg, index) => (
-              <TableRow key={index}>
-                <TableCell sx={{ color: "#fff" }}>{msg.wsName}</TableCell>
-                <TableCell sx={{ color: "#fff" }}>{msg.timestamp}</TableCell>
-                <TableCell sx={{ color: "#fff" }}>{msg.payload.action}</TableCell>
-                <TableCell>
-                  <pre style={{ margin: 0, color: "#fff" }}>
-                    {JSON.stringify(msg.payload, null, 2)}
-                  </pre>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </CardContent>
-    </Card>
+    <DataMessagesSection 
+    workstationsData={workstationsData} 
+    filterByWorkstation={filterByWorkstation}
+    />
   </Paper>
-);
-
+  );
 };
 
 export default RealtimeMessages;
